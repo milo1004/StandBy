@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="StandBy">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <style>
+            @font-face {
+                font-family: "RobotoMono";
+                src: url("RobotoMono.ttf") format("truetype");
+            }
+            html, body {
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 4px;
+                background-color: black;
+                font-family: "RobotoMono";
+                color: #5fe4f9;
+                flex-direction: row;
+                height: 100%;
+            }
+
+
+            .h1-time {
+                font-size: 20vh;
+                margin: 0 0.2em;
+                
+            }
+
+            .clock-container {
+                font-family: "RobotoMono";
+                display: flex;
+                padding: 4px;
+                background-color: black;
+                color: #80f95f;
+                justify-content: center;
+                align-items: center;
+                flex-direction: row;
+                border: 3px solid gray;
+                border-radius: 30px;
+                padding: 1em 2em;
+                margin-bottom: 2.5px;
+            }
+
+            .date-container {
+                font-family: "RobotoMono";
+                display: flex;
+                padding: 4px;
+                background-color: black;
+                color: #80f95f;
+                justify-content: center;
+                align-items: center;
+                flex-direction: row;
+                border: 3px solid gray;
+                border-radius: 30px;
+                padding: 1em 2em;
+                height: calc(50% - 2.5px);
+            }
+
+            .info-container {
+                font-family: "RobotoMono";
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                border: none;
+                margin: 0 30px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="clock-container" class="clock-container">
+            <h1 class="h1-time" id="hour">00</h1>
+            <h1 class="h1-time">:</h1>
+            <h1 class="h1-time" id="minute">00</h1>
+        </div>
+        <div id="info-container" class="info-container">
+            <div class="date-container" id="date-container">
+                <h2 id="month">Jan</h2>
+                <h2>&nbsp</h2>
+                <h2 id="day">01</h2>
+                <h2>&nbsp</h2>
+                <h1 id="weekday">Sun</h1>
+            </div>
+        </div>
+        <script>
+            function getClockHeight() {
+                const clockEl = document.getElementById("clock-container");
+                return clockEl.offsetHeight;
+            }
+
+            const info = document.getElementById("info-container");
+            const date_con = document.getElementById("date-container");
+            info.style.height = getClockHeight() + 'px';
+            date_con.style.height = eval(getClockHeight() / 2 + 2.5) + 'px';
+                
+            function updateTime() {
+                const hourEl = document.getElementById("hour");
+                const minuteEl = document.getElementById("minute");
+                const monthEl = document.getElementById('month');
+                const dayEl = document.getElementById('day');
+                const weekdayEl = document.getElementById('weekday');
+                const now = new Date();
+                let hour = now.getHours();
+                let minute = now.getMinutes();
+
+                hour = hour.toString().padStart(2,'0');
+                minute = minute.toString().padStart(2,'0');
+
+                hourEl.textContent = hour;
+                minuteEl.textContent = minute;
+
+                const months = [
+                    'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+                ];
+                const weekdays = [
+                    'Sun','Mon','Tue','Wed','Thur','Fri','Sat'
+                ];
+
+                let month = months[now.getMonth()];
+                let day = now.getDate().toString().padStart(2,'0');
+                let weekday = weekdays[now.getDay()];
+
+                monthEl.textContent = month;
+                dayEl.textContent = day;
+                weekdayEl.textContent = weekday;
+            }
+
+            updateTime();
+            console.log(getClockHeight());
+            setInterval(updateTime, 100);
+        </script>
+    </body>
+</html>
