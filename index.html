@@ -2,6 +2,7 @@
 
 <html>
     <head>
+        <title>StandBy</title>
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="StandBy">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -9,7 +10,14 @@
         <style>
             @font-face {
                 font-family: "RobotoMono";
-                src: url("RobotoMono.ttf") format("truetype");
+                src: url("RobotoMono.woff2") format("woff2"), 
+                       url(RobotoMono.ttf) format("TrueType");
+                font-weight: normal;
+                font-style: normal;
+                font-display:swap;
+            }
+            * {
+                font-family: "RobotoMono", monospace;
             }
             html, body {
                 height: 100%;
@@ -30,9 +38,11 @@
 
 
             .h1-time {
-                font-size: 20vh;
+                font-size: 18vh;
+                line-height: 1;
                 margin: 0 0.2em;
-                
+                -webkit-font-smoothing: antialiased;
+                text-rendering: geometricPrecision
             }
 
             .clock-container {
@@ -48,6 +58,7 @@
                 border-radius: 30px;
                 padding: 1em 2em;
                 margin-bottom: 2.5px;
+                height: 50%;
             }
 
             .date-container {
@@ -55,23 +66,24 @@
                 display: flex;
                 padding: 4px;
                 background-color: black;
-                color: #80f95f;
+                color: rgb(255,255,255);
                 justify-content: center;
                 align-items: center;
                 flex-direction: row;
                 border: 3px solid gray;
                 border-radius: 30px;
                 padding: 1em 2em;
-                height: calc(50% - 2.5px);
+                height: calc(25% - 2.5px);
             }
 
             .info-container {
                 font-family: "RobotoMono";
                 display: flex;
                 align-items: center;
+                justify-content: center;
                 flex-direction: column;
                 border: none;
-                margin: 0 30px;
+                margin: 0 10px;
             }
 
         </style>
@@ -84,11 +96,11 @@
         </div>
         <div id="info-container" class="info-container">
             <div class="date-container" id="date-container">
+                <h1 id="weekday" style="color: #80f95f">Sun</h1>
+                <h1>&nbsp</h1>
                 <h2 id="month">Jan</h2>
                 <h2>&nbsp</h2>
                 <h2 id="day">01</h2>
-                <h2>&nbsp</h2>
-                <h1 id="weekday">Sun</h1>
             </div>
         </div>
         <script>
@@ -100,7 +112,6 @@
             const info = document.getElementById("info-container");
             const date_con = document.getElementById("date-container");
             info.style.height = getClockHeight() + 'px';
-            date_con.style.height = eval(getClockHeight() / 2 + 2.5) + 'px';
                 
             function updateTime() {
                 const hourEl = document.getElementById("hour");
