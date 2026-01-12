@@ -145,9 +145,19 @@
                 weekdayEl.textContent = weekday;
             }
 
+            function startClock()  {
+                updateTime();
+                const timeNow = new Date();
+                const delay = (60 - timeNow.getSeconds()) * 1000 - timeNow.getMilliseconds();
+                setTimeout(() => {
+                    updateTime();
+                    setInterval(updateTime, 60000)
+                }, delay
+                )
+            }
             updateTime();
+            startClock();
             console.log(getClockHeight());
-            setInterval(updateTime, 100);
         </script>
     </body>
 </html>
