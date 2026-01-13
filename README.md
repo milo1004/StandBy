@@ -1,2 +1,3 @@
 # StandBy
-This is a webapp that allows devices to have a StandBy clock, mot just limited to iOS
+This is a webapp that allows devices to have a StandBy clock, not just limited to iOS, which can be added as a PWA
+visit the webpage [here](https://standbyclock.pages.dev)
