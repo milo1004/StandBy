@@ -2,22 +2,34 @@
 
 <html>
     <head>
+        <link rel="icon" type="image/x-icon" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="400x400" href="favicon.png">
         <title>StandBy</title>
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="StandBy">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-orientation" content="landscape">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#000000">
+
         <style>
             @font-face {
                 font-family: "RobotoMono";
                 src: url("RobotoMono.woff2") format("woff2"), 
-                       url(RobotoMono.ttf) format("TrueType");
+                       url(RobotoMono.ttf) format("truetype");
                 font-weight: normal;
                 font-style: normal;
                 font-display:swap;
             }
             * {
                 font-family: "RobotoMono", monospace;
+                user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+                -moz-user-select: none;
+                -webkit-touch-callout: none;
+                -webkit-tap-highlight-color: transparent;
             }
             html, body {
                 height: 100%;
@@ -84,6 +96,9 @@
                 flex-direction: column;
                 border: none;
                 margin: 0 10px;
+                cursor: grab;
+                position: absolute;
+                touch-action: none;
             }
 
         </style>
@@ -104,15 +119,97 @@
             </div>
         </div>
         <script>
+            const info_container_box = document.getElementById("info-container");
+            let icOffSetX = 0;
+            let icOffSetY = 0;
+            let isDown = false;
+            let icHasBeenMoved = false;
+
+            let interval;
+            interval = setInterval(() => {}, 60000); // This is just to prevent lock up if the window gets immediately minimized, so clearInterval(); works
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    const currentTime = new Date();
+                    updateTime();
+                    const delay = (60 - currentTime.getSeconds()) * 1000 - currentTime.getMilliseconds();
+                    setTimeout(() => {
+                        clearInterval(interval);
+                        interval = setInterval(updateTime, 60000);
+                    }, delay);
+                }
+            });
+
+            info_container_box.addEventListener(
+                "pointerdown",e => {
+                    isDown = true;
+                    icOffSetX = e.clientX - info_container_box.offsetLeft;
+                    icOffSetY = e.clientY - info_container_box.offsetTop;
+                    if (info_container_box.setPointerCapture && e.pointerId != undefined) {
+                        try {
+                            info_container_box.setPointerCapture(e.pointerId);
+                        } catch (_) {
+                            
+                        }
+                    }
+                    info_container_box.style.cursor = "grabbing";
+                }
+            );
+
+            document.addEventListener("pointermove", e => {
+                if (!isDown) return;
+                icHasBeenMoved = true;
+                info_container_box.style.left = `${e.clientX - icOffSetX}px`
+                info_container_box.style.top = `${e.clientY - icOffSetY}px`
+            });
+
+            document.addEventListener("pointerup", e => {
+                isDown = false;
+                info_container_box.style.cursor = "grab";
+                if (info_container_box.releasePointerCapture && e.pointerId != undefined) {
+                    try {
+                        info_container_box.releasePointerCapture(e.pointerId);
+                    } catch (_) {}
+                }
+                const x = parseFloat(info_container_box.style.left);
+                const y = parseFloat(info_container_box.style.top);
+                const icCoordinates = {
+                    "x": x,
+                    "y": y
+                }
+                localStorage.setItem("icCoordinates", JSON.stringify(icCoordinates));
+            });
+
             function getClockHeight() {
                 const clockEl = document.getElementById("clock-container");
                 return clockEl.offsetHeight;
             }
 
+            function getClockWidth() {
+                const clockEl = document.getElementById("clock-container");
+                return clockEl.offsetWidth;
+            }
+
             const info = document.getElementById("info-container");
             const date_con = document.getElementById("date-container");
             info.style.height = getClockHeight() + 'px';
-                
+            
+            function position_info_container() {
+                const icEl = document.getElementById("info-container");
+                const icCoordinates = localStorage.getItem("icCoordinates");
+                if (icCoordinates) {
+                    icEl.style.top = JSON.parse(icCoordinates).y + 'px';
+                    icEl.style.left = JSON.parse(icCoordinates).x + 'px';
+                } else {
+                    const clockEl = document.getElementById("clock-container");
+                    const infoEl = document.getElementById("info-container");
+
+                    const rect = clockEl.getBoundingClientRect();
+
+                    infoEl.style.left = rect.right + 'px';
+                    infoEl.style.top = rect.top + 'px';
+                }
+            }
+
             function updateTime() {
                 const hourEl = document.getElementById("hour");
                 const minuteEl = document.getElementById("minute");
@@ -133,7 +230,7 @@
                     'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
                 ];
                 const weekdays = [
-                    'Sun','Mon','Tue','Wed','Thur','Fri','Sat'
+                    'Sun','Mon','Tue','Wed','Thu','Fri','Sat'
                 ];
 
                 let month = months[now.getMonth()];
@@ -142,7 +239,7 @@
 
                 monthEl.textContent = month;
                 dayEl.textContent = day;
-                weekdayEl.textContent = weekday;
+                weekdayEl.textContent = weekday;;
             }
 
             function startClock()  {
@@ -151,13 +248,19 @@
                 const delay = (60 - timeNow.getSeconds()) * 1000 - timeNow.getMilliseconds();
                 setTimeout(() => {
                     updateTime();
-                    setInterval(updateTime, 60000)
+                    interval = setInterval(updateTime, 60000);
                 }, delay
                 )
             }
+
+            position_info_container();
             updateTime();
             startClock();
             console.log(getClockHeight());
+
+            if (!icHasBeenMoved) {
+                 position_info_container();
+            }
         </script>
     </body>
 </html>
