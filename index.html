@@ -264,11 +264,11 @@
 
                     const rect = cc.getBoundingClientRect();
                     
-                    const target_x = rect.width / 2 + rect.left;
-                    const target_y = rect.height / 2 + rect.top;
+                    const target_x = rect.right + 5;
+                    const target_y = window.innerHeight / 2 - ic.offsetHeight / 2;
         
-                    ic.style.left = target_x;
-                    ic.style.top = target_y; 
+                    ic.style.left = target_x + 'px';
+                    ic.style.top = target_y + 'px';
                 }
             }
 
