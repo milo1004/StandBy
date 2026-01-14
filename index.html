@@ -93,11 +93,10 @@
                 justify-content: center;
                 align-items: center;
                 flex-direction: row;
-                padding: 1em 0;
-                height: calc(25% - 2.5px);
-                margin-bottom: 2.5px;
                 border: 3px solid gray;
                 border-radius: 30px;
+                padding: 1em 2em;
+                height: calc(25% - 2.5px);
             }
 
             .info-container {
@@ -124,34 +123,13 @@
                 cursor: pointer;
             }
 
-            .weather-container {
-                font-family: "RobotoMono";
-                display: flex;
-                padding: 4px;
-                background-color: black;
-                color: rgb(255,255,255);
-                justify-content: center;
-                align-items: center;
-                flex-direction: row;
-                height: calc(25% - 2.5px);
-                padding: 1em 0.1em;
-                margin-top: 2.5px;
-                border: 3px solid gray;
-                border-radius: 30px;
-            }
-
-            .weather-container, .date-container {
-                width: 100%;
-            }
-
         </style>
     </head>
     <body>
-        <input type="button" value="Reset all settings" onclick="reset()" id="reset">
         <div id="clock-container" class="clock-container">
-            <h1 class="h1-time" id="hour">--</h1>
+            <h1 class="h1-time" id="hour">00</h1>
             <h1 class="h1-time colon">:</h1>
-            <h1 class="h1-time" id="minute">--</h1>
+            <h1 class="h1-time" id="minute">00</h1>
         </div>
         <div id="info-container" class="info-container">
             <div class="date-container" id="date-container">
@@ -161,12 +139,8 @@
                 <h2>&nbsp</h2>
                 <h2 id="day">01</h2>
             </div>
-            <div class="weather-container" id="weather-container">
-                <h1 id="temp" style="color:#80f95f">--°C</h1>
-                <h1>&nbsp&nbsp</h1>
-                <h1 id="code">--</h1>
-            </div>
         </div>
+        <input type="button" value="Reset all settings" onclick="reset()" id="reset">
         <script>
             const info_container_box = document.getElementById("info-container");
             let icOffSetX = 0;
@@ -212,7 +186,6 @@
             });
 
             document.addEventListener("pointerup", e => {
-                if (!isDown) return;
                 isDown = false;
                 info_container_box.style.cursor = "grab";
                 if (info_container_box.releasePointerCapture && e.pointerId != undefined) {
@@ -318,7 +291,6 @@
                     interval = setInterval(() => {
                         updateTime();
                         position_cc();
-                        position_info_container();
                     }, 60000);
                 }, delay
                 )
@@ -329,74 +301,16 @@
                 window.location.reload();
             }
 
-            function showPosition(position) {
-                const codes = { 0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "foggy", 48: "foggy", 51: "light drizzle", 61: "rain", 80: "rain showers", 95: "thunderstorm" };
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-                    const tempEl = document.getElementById("temp");
-                    const codeEl = document.getElementById("code");
-
-                    tempEl.textContent = `${data.current_weather.temperature}°C`;
-                    if (codes[data.current_weather.weathercode] !== undefined) {
-                        codeEl.textContent = codes[data.current_weather.weathercode];
-                    } else {
-                        codeEl.textContent = "unknown";
-                    }
-
-                })
-                .catch(err => console.error(err));
-                return data;
-            }
-
-            function showError(error) {
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        alert("Location permission has been denied. Please grant permission");
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        alert("User denied the request for Geolocation");
-                        break
-                    case error.TIMEOUT:
-                        alert("Request timeout");
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        alert("An unknown error occured");
-                        break;
-                }
-            }
-
-            function getLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(showPosition, showError);
-                } else {
-                    alert("Geolocation is not supported by your browser.");
-                }
-            }
-
-            function wc_setWidth() {
-                const dcEl = document.getElementById("date-container");
-                const wcEl = document.getElementById("weather-container");
-
-                wcEl.style.width = dcEl.clientWidth + 'px';
-            }
-
             updateTime();
             startClock();
             document.fonts.ready.then(() => {
                 position_cc();
                 position_info_container();
-                getLocation();
                 document.body.style.visibility = 'visible';
             })
             console.log(getClockHeight());
             console.log(window.innerHeight);
             console.log(window.innerWidth);
-
-            </script>
+        </script>
     </body>
 </html>
