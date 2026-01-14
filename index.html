@@ -46,6 +46,7 @@
                 color: #5fe4f9;
                 flex-direction: row;
                 height: 100%;
+                visibility: hidden;
             }
 
 
@@ -53,6 +54,15 @@
                 font-size: 18vh;
                 line-height: 1;
                 margin: 0 0.2em;
+                -webkit-font-smoothing: antialiased;
+                text-rendering: geometricPrecision
+            }
+
+            .colon {
+                line-height: 1;
+                margin-left: 0.4em;
+                margin-right: 0.4em;
+                margin-bottom: 0.25em;
                 -webkit-font-smoothing: antialiased;
                 text-rendering: geometricPrecision
             }
@@ -71,6 +81,7 @@
                 padding: 1em 2em;
                 margin-bottom: 2.5px;
                 height: 50%;
+                position:absolute;
             }
 
             .date-container {
@@ -101,12 +112,23 @@
                 touch-action: none;
             }
 
+            #reset {
+                font-family: "RobotoMono";
+                position: fixed;
+                border: none;
+                color: gray;
+                background-color: black;
+                text-decoration: underline;
+                bottom: 2%;
+                cursor: pointer;
+            }
+
         </style>
     </head>
     <body>
         <div id="clock-container" class="clock-container">
             <h1 class="h1-time" id="hour">00</h1>
-            <h1 class="h1-time">:</h1>
+            <h1 class="h1-time colon">:</h1>
             <h1 class="h1-time" id="minute">00</h1>
         </div>
         <div id="info-container" class="info-container">
@@ -118,6 +140,7 @@
                 <h2 id="day">01</h2>
             </div>
         </div>
+        <input type="button" value="Reset all settings" onclick="reset()" id="reset">
         <script>
             const info_container_box = document.getElementById("info-container");
             let icOffSetX = 0;
@@ -170,11 +193,11 @@
                         info_container_box.releasePointerCapture(e.pointerId);
                     } catch (_) {}
                 }
-                const x = parseFloat(info_container_box.style.left);
-                const y = parseFloat(info_container_box.style.top);
+                const rect = info_container_box.getBoundingClientRect();
+
                 const icCoordinates = {
-                    "x": x,
-                    "y": y
+                    "x": rect.left,
+                    "y": rect.top
                 }
                 localStorage.setItem("icCoordinates", JSON.stringify(icCoordinates));
             });
@@ -191,7 +214,16 @@
 
             const info = document.getElementById("info-container");
             const date_con = document.getElementById("date-container");
-            info.style.height = getClockHeight() + 'px';
+
+            function position_cc() {
+                const clockEl = document.getElementById("clock-container");
+                
+                const target_x = (window.innerWidth / 2 - clockEl.offsetWidth / 2) + 'px';
+                const target_y = (window.innerHeight / 2 - clockEl.offsetHeight / 2) + 'px';
+
+                clockEl.style.left = target_x;
+                clockEl.style.top = target_y;
+            }
             
             function position_info_container() {
                 const icEl = document.getElementById("info-container");
@@ -200,15 +232,23 @@
                     icEl.style.top = JSON.parse(icCoordinates).y + 'px';
                     icEl.style.left = JSON.parse(icCoordinates).x + 'px';
                 } else {
-                    const clockEl = document.getElementById("clock-container");
-                    const infoEl = document.getElementById("info-container");
+                    const cc = document.getElementById("clock-container");
+                    const ic = document.getElementById("info-container");
 
-                    const rect = clockEl.getBoundingClientRect();
-
-                    infoEl.style.left = rect.right + 'px';
-                    infoEl.style.top = rect.top + 'px';
+                    const rect = cc.getBoundingClientRect();
+                    
+                    const target_x = rect.width / 2 + rect.left;
+                    const target_y = rect.height / 2 + rect.top;
+        
+                    ic.style.left = target_x;
+                    ic.style.top = target_y; 
                 }
             }
+
+            window.addEventListener("resize", () => {
+                position_cc();
+                position_info_container();
+            });
 
             function updateTime() {
                 const hourEl = document.getElementById("hour");
@@ -248,19 +288,29 @@
                 const delay = (60 - timeNow.getSeconds()) * 1000 - timeNow.getMilliseconds();
                 setTimeout(() => {
                     updateTime();
-                    interval = setInterval(updateTime, 60000);
+                    interval = setInterval(() => {
+                        updateTime();
+                        position_cc();
+                    }, 60000);
                 }, delay
                 )
             }
 
-            position_info_container();
+            function reset() {
+                localStorage.removeItem("icCoordinates");
+                window.location.reload();
+            }
+
             updateTime();
             startClock();
+            document.fonts.ready.then(() => {
+                position_cc();
+                position_info_container();
+                document.body.style.visibility = 'visible';
+            })
             console.log(getClockHeight());
-
-            if (!icHasBeenMoved) {
-                 position_info_container();
-            }
+            console.log(window.innerHeight);
+            console.log(window.innerWidth);
         </script>
     </body>
 </html>
